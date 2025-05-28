@@ -5,25 +5,22 @@ import org.openqa.selenium.WebDriver;
 import org.testng.annotations.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 
-import utils.Config;
 
 public class BaseTest {
     protected WebDriver driver;
 
-    @BeforeMethod
-    public void setUp() {
+    @BeforeClass
+    public void setUpClass() {
         WebDriverManager.chromedriver().setup();
         driver = new ChromeDriver();
         driver.manage().window().maximize();
-
-        driver.get(Config.BASE_URL);
     }
 
-    @AfterMethod
-    public void tearDown() {
+    @AfterClass
+    public void tearDownClass() {
         if (driver != null) {
             driver.quit();
         }
     }
-
 }
+

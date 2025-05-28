@@ -23,7 +23,7 @@ public class RegisterPage {
     private By RegisterButton = By.cssSelector("button[class='style__ContainerButton-sc-1wsixal-0 CMabB button__child']");
     private By saldoToggle = By.cssSelector("label.styles__Container-sc-1pngcbh-0.kIwoPV");
     private By MsgModal = By.id("modalText");
-
+    private By CloseModalButton = By.id("btnCloseModal");
 
 
     // ========== Actions ==========
@@ -58,5 +58,9 @@ public class RegisterPage {
 
     public String getMessage() {
         return wait.until(ExpectedConditions.visibilityOfElementLocated(MsgModal)).getText();
+    }
+
+    public void closeModal() {
+        wait.until(ExpectedConditions.elementToBeClickable(CloseModalButton)).click();
     }
 }
