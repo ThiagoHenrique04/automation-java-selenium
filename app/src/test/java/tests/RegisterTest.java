@@ -7,8 +7,7 @@ import com.github.javafaker.Faker;
 
 import base.BaseTest;
 import io.qameta.allure.*;
-import pages.RegisterPage;
-
+import pages.*;
 import utils.Config;
 
 
@@ -22,14 +21,21 @@ public class RegisterTest extends BaseTest{
     private String name;
     private String password;
     private RegisterPage registerPage;
+    private HomePage homePage;
+    private LoginPage loginPage;
 
     @BeforeMethod
     public void setUp() {
         driver.get(Config.BASE_URL); 
+
         email = faker.internet().emailAddress();
         name = faker.name().fullName();
         password = faker.internet().password();
+        
         registerPage = new RegisterPage(driver);
+        loginPage = new LoginPage(driver);
+        homePage = new HomePage(driver);
+        
         registerPage.clickAccessRegisterButton();
     }
 
@@ -42,10 +48,16 @@ public class RegisterTest extends BaseTest{
         registerPage.enterPassword(password);
         registerPage.enterPasswordConfirmation(password);
         registerPage.clickRegisterButton();
+        
         Assert.assertTrue(registerPage.getMessage()
             .contains("criada com sucesso"));
-        //Depois realizar a validação do saldo
 
+        loginPage.closeModal();
+        loginPage.doLogin(email, password);
+
+        String balanceValue = homePage.getBalanceValue();
+        Assert.assertEquals(balanceValue, "0.00", 
+            "O saldo inicial deve ser R$ 0,00. Saldo atual: " + balanceValue);
     }
 
     @Test(description = "CT-002 - Test Register user successfully - with balance")
@@ -58,9 +70,16 @@ public class RegisterTest extends BaseTest{
         registerPage.enterPasswordConfirmation(password);
         registerPage.createAccountWithSaldo();
         registerPage.clickRegisterButton();
+
         Assert.assertTrue(registerPage.getMessage()
             .contains("criada com sucesso"));
-        //Depois realizar a validação do saldo
+
+        loginPage.closeModal();
+        loginPage.doLogin(email, password);
+    
+        String balanceValue = homePage.getBalanceValue();
+        Assert.assertEquals(balanceValue, "1.000.00", 
+            "O saldo inicial deve ser R$ 1.000,00. Saldo atual: " + balanceValue);
     }
 
     @Test(description = "CT-003 - Test Register User Without Filling in Name")
@@ -71,6 +90,7 @@ public class RegisterTest extends BaseTest{
         registerPage.enterPassword(password);
         registerPage.enterPasswordConfirmation(password);
         registerPage.clickRegisterButton();
+
         Assert.assertTrue(registerPage.getMessage()
             .contains("Nome não pode ser vazio."));
     }
@@ -84,6 +104,7 @@ public class RegisterTest extends BaseTest{
         registerPage.enterPassword(password);
         registerPage.enterPasswordConfirmation(password);
         registerPage.clickRegisterButton();
+
         Assert.assertTrue(registerPage.getMessage()
             .contains("Email não pode ser vazio."));
     }
@@ -96,6 +117,7 @@ public class RegisterTest extends BaseTest{
         registerPage.enterName(name);
         registerPage.enterPasswordConfirmation(password);
         registerPage.clickRegisterButton();
+
         Assert.assertTrue(registerPage.getMessage()
             .contains("Senha não pode ser vazio."));
     }
@@ -108,8 +130,9 @@ public class RegisterTest extends BaseTest{
         registerPage.enterName(name);
         registerPage.enterPassword(password);
         registerPage.clickRegisterButton();
+
         Assert.assertTrue(registerPage.getMessage()
-            .contains("criada com sucesso"));
+            .contains("Confirmação de Senha não pode ser vazio."));
     }
 
     @Test(description = "CT-007 - Test Register User with different password and password confirmation")
@@ -121,6 +144,7 @@ public class RegisterTest extends BaseTest{
         registerPage.enterPassword(password);
         registerPage.enterPasswordConfirmation("teste123");
         registerPage.clickRegisterButton();
+        
         Assert.assertTrue(registerPage.getMessage()
             .contains("As senhas não são iguais."));
     }

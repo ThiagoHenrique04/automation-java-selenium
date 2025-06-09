@@ -3,7 +3,9 @@ package pages;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.*;
 
+import java.util.regex.Pattern;
 import java.time.Duration;
+import java.util.regex.Matcher;
 public class RegisterPage {
 
     private WebDriver driver;
@@ -62,5 +64,29 @@ public class RegisterPage {
 
     public void closeModal() {
         wait.until(ExpectedConditions.elementToBeClickable(CloseModalButton)).click();
+    }
+
+    public String getAccountNumber() {
+        try {
+            String modalText = wait.until(ExpectedConditions.visibilityOfElementLocated(MsgModal)).getText();
+            
+            Pattern pattern = Pattern.compile("conta (?:é |)?(\\d{2,3}-\\d+)");
+            Matcher matcher = pattern.matcher(modalText);
+            
+            if (matcher.find()) {
+                return matcher.group(1); 
+            }
+            
+            Pattern fallbackPattern = Pattern.compile("(\\d{3}-\\d+)");
+            Matcher fallbackMatcher = fallbackPattern.matcher(modalText);
+            
+            if (fallbackMatcher.find()) {
+                return fallbackMatcher.group(1);
+            }
+            
+        } catch (Exception e) {
+            System.err.println("Erro ao capturar número da conta: " + e.getMessage());
+        }
+        return null;
     }
 }

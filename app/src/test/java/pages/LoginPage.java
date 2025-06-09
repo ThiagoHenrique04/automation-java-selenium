@@ -21,7 +21,8 @@ public class LoginPage {
     private By Passwordinput = By.name("password");
     private By LoginButton = By.cssSelector("button[class='style__ContainerButton-sc-1wsixal-0 otUnI button__child']");
     private By MsgModal = By.id("modalText");
-
+    private By MsgFieldError = By.cssSelector("div[class='style__ContainerFieldInput-sc-s3e9ea-0 kOeYBn input__child'] p[class='input__warging']");
+    private By CloseModalButton = By.id("btnCloseModal");
 
     // ============ Actions ==========
     public void enterEmail(String email) {
@@ -40,10 +41,21 @@ public class LoginPage {
         return wait.until(ExpectedConditions.visibilityOfElementLocated(MsgModal)).getText();
     }
     
+    public String getErrorMessage() {
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(MsgFieldError)).getText();
+    }
+
+    public void closeModal() {
+        wait.until(ExpectedConditions.elementToBeClickable(CloseModalButton)).click();
+    }
 
     public void doLogin(String email, String password) {
         enterEmail(email);
         enterPassword(password);
         clickLoginButton();
     }
+
+    public int getErrorMessageCount() {
+    return driver.findElements(MsgFieldError).size();
+}
 }

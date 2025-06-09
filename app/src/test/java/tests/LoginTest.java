@@ -6,7 +6,7 @@ import org.testng.Assert;
 import org.testng.annotations.*;
 
 import com.github.javafaker.Faker;
-
+import utils.User;
 import base.BaseTest;
 import io.qameta.allure.*;
 import pages.HomePage;
@@ -32,10 +32,10 @@ public class LoginTest extends BaseTest {
         
         if (method.getName().equals("loginWithValidCredentials")) {
             UserHelper userHelper = new UserHelper(driver);
-            String[] userData = userHelper.registerUser();
-            email = userData[0];
-            password = userData[1];
-            name = userData[2];
+            User user = userHelper.createUserWithBalance();
+            email = user.email;
+            password = user.password;
+            name = user.name;
         } else {
             email = faker.internet().emailAddress();
             password = faker.internet().password();
@@ -53,8 +53,7 @@ public class LoginTest extends BaseTest {
     String normalizedText = welcomeText.replaceAll("\\s+", " ").trim();
     String expectedText = "Olá " + name + ", bem vindo ao BugBank :)";
 
-    Assert.assertTrue(normalizedText.contains(expectedText), 
-    "Texto de boas vindas não encontrado. Esperado: " + expectedText + " | Encontrado: " + normalizedText);
+    Assert.assertEquals(normalizedText, expectedText);
  }
 
     @Test(description = "CT-002 - Test Login with invalid credentials")
@@ -66,4 +65,53 @@ public class LoginTest extends BaseTest {
     Assert.assertTrue(loginPage.getMessage()
     .contains("Usuário ou senha inválido"));
  }
+
+ @Test(description = "CT003 - Test Login with empty email") 
+ @Severity(SeverityLevel.CRITICAL)
+ public void loginWithEmptyEmail() {
+
+    loginPage.enterEmail("");
+    loginPage.enterPassword(password);
+    loginPage.clickLoginButton();
+
+    Assert.assertTrue(loginPage.getErrorMessage()
+    .contains("É campo obrigatório"));
+ }
+
+ @Test(description = "CT004 - Test Login with empty password")  
+ @Severity(SeverityLevel.CRITICAL)
+ public void loginWithEmptyPassword() {
+
+    loginPage.enterEmail(email);
+    loginPage.enterPassword("");
+    loginPage.clickLoginButton();
+
+    Assert.assertTrue(loginPage.getErrorMessage()
+    .contains("É campo obrigatório"));
+ }
+ 
+@Test(description = "CT005 - Test Login with both fields empty") 
+@Severity(SeverityLevel.CRITICAL)
+public void loginWithBothFieldsEmpty() {
+    
+    loginPage.enterEmail("");
+    loginPage.enterPassword("");
+    loginPage.clickLoginButton();
+
+    Assert.assertEquals(loginPage.getErrorMessageCount(), 2);
+}
+    
+@Test(description = "CT006 - Test Login with invalid email format") 
+@Severity(SeverityLevel.CRITICAL)
+public void loginWithInvalidEmailFormat() {
+    
+        loginPage.enterEmail("invalid-email-format");
+        loginPage.enterPassword(password);
+        loginPage.clickLoginButton();
+    
+        Assert.assertTrue(loginPage.getErrorMessage()
+        .contains("Formato inválido"));
+    }
+
+    
 }
